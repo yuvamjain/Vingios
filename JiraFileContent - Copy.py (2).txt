@@ -1,0 +1,172 @@
+import base64
+import pandas as pd
+from urllib.request import Request, urlopen
+
+import requests
+from requests.auth import HTTPBasicAuth
+
+#pip install python-docx
+import docx
+import PyPDF2
+import xlrd
+
+import os
+
+klera_in = ["FILECONTENTURL","MIMETYPE"]
+
+
+#,"user","password"
+
+
+#global docx
+#global getText
+#def getText(filename):
+#    doc = docx.Document(filename)
+#    fullText = []
+#    for para in doc.paragraphs:
+#        fullText.append(para.text)
+#    return '\n'.join(fullText)
+
+user='ashutosh.agrawal@clear-trail.com'
+password='l7vx987hYGVL5LGY1KbpBFD1'
+
+run_from_python = False
+if run_from_python:
+
+    MIMETYPE = "binary/octet-stream"
+    #FILECONTENTURL = 'https://cleartrail.atlassian.net/secure/attachment/59320/ServiceNow+OAuth2.0.docx'
+#    FILECONTENTURL = 'https://cleartrail.atlassian.net/secure/attachment/59340/Instruction+file+%28fede92c4-7c05-4788-8f3c-ad97d683112e%29.pdf'
+#    FILECONTENTURL = 'https://cleartrail.atlassian.net/secure/attachment/59320/ServiceNow+OAuth2.0.docx'
+    FILECONTENTURL = 'https://cleartrail.atlassian.net/secure/attachment/59348/Klera_InstallationGuide.pdf'
+
+
+
+
+
+dump_klera_inputs = False
+run_from_klera_dump = False
+
+if dump_klera_inputs:
+    import shelve
+    dump_filename = 'C://jiraFileContentDmp2.pkl'
+    my_shelf = shelve.open(dump_filename,'n') # 'n' for new
+
+    temp_list = klera_in
+    if 'klera_meta_in' in globals():
+        temp_list.append("klera_meta_in")
+
+    for key in temp_list:
+        try:
+            my_shelf[key] = globals()[key]
+        except TypeError:
+            ##__builtins__, my_shelf, and imported modules can not be shelved.
+            print('ERROR shelving: {0}'.format(key))
+    my_shelf.close()
+
+
+# ####### ------------- Read Inputs from Local File -------- ########
+if run_from_klera_dump:
+    import shelve
+    dump_filename = 'C://jiraFileContentDmp2.pkl'
+    my_shelf = shelve.open(dump_filename)
+    for key in my_shelf:
+        globals()[key]=my_shelf[key]
+    my_shelf.close()
+
+
+
+
+
+
+
+
+
+
+
+try:
+    if (MIMETYPE == "text/plain") | (MIMETYPE == "application/json"):
+
+    	credentials = '{user}:{password}'.format(**vars()).encode()
+    	response = urlopen(Request(FILECONTENTURL, headers={'Authorization': b'Basic '  + base64.b64encode(credentials)}))
+    	content = response.read()
+    	content = content.decode("utf-8")
+    else:
+        if FILECONTENTURL.endswith('docx') | FILECONTENTURL.endswith('xlsx') | FILECONTENTURL.endswith('pdf'):
+
+        	response = requests.get(FILECONTENTURL, auth=HTTPBasicAuth(user,password))
+
+        	if response.status_code == 200:
+                ## Save the content to a temp File
+        	    extn = ''
+        	    if FILECONTENTURL.endswith('.docx'):
+        	        extn = '.docx'
+        	    elif FILECONTENTURL.endswith('.xlsx'):
+        	        extn = '.xlsx'
+        	    elif FILECONTENTURL.endswith('.pdf'):
+        	        extn = '.pdf'
+
+                ## Save the content to a temp File
+        	    tempFile = 'C:\\Tempdocument'+extn
+        	    with open(tempFile, 'wb') as f:
+        	        for chunk in response.iter_content():
+        	            f.write(chunk)
+        	        f.flush()
+        	        f.close()
+
+                ## Read text from Temp File
+        	    if extn == '.docx':
+        	        doc = docx.Document(tempFile)
+        	        content = []
+        	        for para in doc.paragraphs:
+        	           content.append(para.text)
+        	        content = '\n'.join(content)
+        	        #content = str(content)
+
+        	    elif extn == '.xlsx':
+        	        content = []
+        	        wb = xlrd.open_workbook(tempFile)
+        	        p = wb.sheet_names()
+        	        for y in p:
+        	            hdr = '********* Content From <' + y + '>*********'
+        	            content.append(hdr)
+        	            sh = wb.sheet_by_name(y)
+        	            for rownum in range(sh.nrows):
+        	                content.append((sh.row_values(rownum)))
+        	        content = str(content)
+
+        	    elif extn == '.pdf':
+        	        pdfFileObj = open(tempFile, 'rb')
+        	        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        	        content = []
+        	        for page in range(pdfReader.numPages):
+        	            pageObj = pdfReader.getPage(page)
+        	            content.append(pageObj.extractText())
+        	        content = str(content)
+        	        # Collapse whitespace
+        	        content = " ".join(content.replace("\\n", " ").strip().split())
+        	        pdfFileObj.close()
+
+        	    else :
+        	        content = 'NOT PROCESSED'
+
+        	    ## Delete the temp File.
+        	    os.remove(tempFile)
+        else :
+            content = "BINARY STREAM. NOT PROCESSED"
+
+#    content = content.encode(encoding='UTF-8',errors='ignore')
+#    content = content[1:30]
+    print(content)
+    out = {'Attachment Data': pd.DataFrame(data={'Data':content}, index=[0])}
+    klera_dst = [out]
+
+    # For Klera formula output
+    klera_scalar = content
+    klera_scalar_datatype = "STRING"
+    klera_scalar_ismultivalue = False
+except Exception as e:
+    out = {'Attachment Data': pd.DataFrame(data={'Data':'Exception Occured'+str(e)}, index=[0])}
+    klera_dst = [out]
+    klera_scalar = 'Exception Occured'
+    klera_scalar_datatype = "STRING"
+    klera_scalar_ismultivalue = False
