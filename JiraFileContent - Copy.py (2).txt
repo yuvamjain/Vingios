@@ -27,8 +27,8 @@ klera_in = ["FILECONTENTURL","MIMETYPE"]
 #        fullText.append(para.text)
 #    return '\n'.join(fullText)
 
-user='ashutosh.agrawal@clear-trail.com'
-password='l7vx987hYGVL5LGY1KbpBFD1'
+user='ashutosh.agasdfasdfcom'
+password='asdfasfd'
 
 run_from_python = False
 if run_from_python:
