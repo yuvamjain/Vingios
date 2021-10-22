@@ -73,4 +73,4 @@ Entities.Separator = "#CTUDASEP#"
 Entities.SeparatorLength = LENGTH(Entities.Separator)
 Person Count = LENGTH(CONCAT(REGEX(CONCATENATE(Entities.Person, Entities.Separator), NULL, Entities.Separator)))/Entities.
 
-13. 
+13.  test regex
