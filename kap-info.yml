@@ -1,0 +1,44 @@
+﻿kap-version: v1
+metadata:
+	# This metadata will be used for reporting and summarizing your activity in KAP. Please ensure it is consistent with other teams in your lob and group.
+    lob: xx
+        # Enter your LOB. (Assoc Tech, CIS, Cust Tech, H&W, IE&Ops, Merch, R&D, SCM, TSA)
+    dev-group: xx
+        # Subdivsion your LOB is divided into. This should be consistent for all the Teams in your group. Check with your Engineering Manager if not sure.
+    team: xx
+    	# Name of your team  (used to report on your team in the dashboards)
+    application-name: xx
+    	# Name of your application (used to report on your application in the dashboards)
+    services:
+    	# List out all the service end points in your application. Used by Monaco to provide a way to track SLOs at a service level.
+        - xx
+        - xx
+kap-metrics:
+    level-1:
+    	# To be KAP Level 2 compliant you need to pass each of these requirements.
+        - repo-in-github-saas: false 
+        	# Enter true if your repo has been migrated to GitHub SaaS.
+        - artifacts-in-artifactory-saas: false 
+        	# Enter true if your artifacts are stored in Artifactory SaaS.
+        - deploy-uses-harness: false 
+        	# 
+        - kap-approved-environment: false 
+        	# Enter true if Azure, GCP or on-prem K8s; false otherwise.
+        - uses-github-actions: false 
+        	# 
+        - api-follows-style-guide: n/a 
+        	# https://developer-internal.Klera.com/documentation/api-style-guide.      If no APIs mark this as N/A
+        - api-documentation-in-catalog: n/a 
+        	# https://developer-internal.Klera.com/documentation/doc-resources/cataloging-an-api/process         If no APIs mark this as N/A
+    level-2:
+        # To be KAP Level 2 compliant you need to be Level 1 compliant and pass each of these requirements.
+        - security-scans-run: false 
+        	# Enter true if your pipelines run the standard Xray and SonarQube scans.
+        - api-follow-api-strategy: false 
+        	# https://developer-internal.Klera.com/documentation/getting-started/api-strategies/introduction    If no APIs mark this as N/A
+    level-3:
+        # To be KAP Level 3 compliant you need to be Level 2 compliant and pass each of these requirements.
+        - completed-team-dojo-training: false 
+        	# Enter true if your team has gone through the Product-led dojo training.
+        - security-scans-pass: false 
+        	# Enter true if your pipelines run the standard Xray and SonarQube scans and they all pass.
